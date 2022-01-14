@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,300" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="./style.css"></a>
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" integrity="sha512-HK5fgLBL+xu6dm/Ii3z4xhlSUyZgTT9tuc/hSrtw6uzJOvgRr2a9jyxxT1ely+B+xFAmJKVSTbpM/CuL7qxO8w==" crossorigin="anonymous" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+   
+    <title>Music player</title>
+</head>
+<body>
+  <div class="player">
+    <!-- Dashboard -->
+    <div class="dashboard">
+      <!-- Header -->
+      <header>
+        <h4>Now playing:</h4>
+        <h2></h2>
+      </header>
+  
+      <!-- CD -->
+      <div class="cd">
+        <div class="cd-thumb" style="background-image: url('')">
+        </div>
+      </div>
+  
+      <!-- Control -->
+      <div class="control">
+        <div class="btn btn-repeat">
+          <i class="fas fa-redo"></i>
+        </div>
+        <div class="btn btn-prev">
+          <i class="fas fa-step-backward"></i>
+        </div>
+        <div class="btn btn-toggle-play">
+          <i class="fas fa-pause icon-pause"></i>
+          <i class="fas fa-play icon-play"></i>
+        </div>
+        <div class="btn btn-next">
+          <i class="fas fa-step-forward"></i>
+        </div>
+        <div class="btn btn-random">
+          <i class="fas fa-random"></i>
+        </div>
+      </div>
+  
+      <input id="progress" class="progress" type="range" value="0" step="1" min="0" max="100">
+  
+      <audio id="audio" src=""></audio>
+    </div>
+  
+    <!-- Playlist -->
+    <div class="playlist" id="playlist">
+     
+   
+    </div>
+  </div>
+  
+  <!-- Design from: https://static.collectui.com/shots/3671744/musicloud-revolutionary-app-for-music-streaming-large -->
+      </div>
+      <script src="./main.js"></script> 
+      <script>
+       $ = document.querySelector.bind(document);
+       $$ = document.querySelectorAll.bind(document);
+       const cd = $('.cd');
+       const heading = $('.dashboard h2');
+       const thumb = $('.cd .cd-thumb');
+       const audio = $('#audio');
+       const playBtn = $('.control .btn-toggle-play');
+       const player = $('.player');
+       const progress = $('#progress');
+       const nextBtn = $('.control .btn-next');
+       const prevBtn = $('.control .btn-prev');
+       const ranBtn = $('.control .btn-random');
+       const replayBtn = $('.control .btn-repeat');
+       console.log(nextBtn);
+       const app = {
+          curentIndex: 0,
+          isRandom: false,
+          isPlaying: 0,
+          isReplay: false,
+          songs : [
+           {
+             name: 'Xích Thêm Chút',
+             singer: 'MCK x Tlinh x Groovie',
+             path: './music/xtc.mp3',
+             img: './img/xtc.jpg'
+           },
+           {
+             name: 'Va vào giai điệu này',
+             singer: 'MCK',
+             path: './music/va.mp3',
+             img: './img/va.jpg'
+           },
+           {
+             name: 'Có một người luôn cười khi anh đến',
+             singer: 'TNS',
+             path: './music/co.mp3',
+             img: './img/co.jpg'
+           },
+           {
+             name: 'No love',
+             singer: 'Kellie',
+             path: './music/love.mp3',
+             img: './img/love.jpg'
+           },
+           {
+             name: 'Mang tiền về cho me',
+             singer: 'Đen Vâu',
+             path: './music/tien.mp3',
+             img: './img/tien.jpg'
+           }
+         ],
+          
+          render: function(){
+            const html = this.songs.map((song, index) => {
+              return ` 
+                <div class="song ${index === this.curentIndex ? 'active' : ''}">
+                  <div class="thumb" style="background-image: url('${song.img}')">
+                  </div>
+                  <div class="body">
+                    <h3 class="title">${song.name}</h3>
+                    <p class="author">${song.singer}</p>
+                  </div>
+                  <div class="option">
+                    <i class="fas fa-ellipsis-h"></i>
+                  </div>
+                </div>`;
+            })
+
+            $('.playlist').innerHTML = html.join('');
+
+          },
+
+          defineProperties: function(){
+            Object.defineProperty(this,'currentSong', {
+              get: function(){
+                return this.songs[this.curentIndex];
+              } 
+            })
+          },
+
+          handleEvent: function() {
+                        
+            const cdWidth = cd.offsetWidth;
+            const cdRotate = thumb.animate([
+              { transform: 'rotate(360deg)' }
+            ], {
+              duration: 10000,
+              iterations: Infinity
+            })
+
+            cdRotate.pause();
+            document.onscroll = function() {
+              const scrollTop = window.screenY || document.documentElement.scrollTop;
+              var newCdWidth = cdWidth - scrollTop;
+              if (newCdWidth < 50) newCdWidth = 0;
+            
+              cd.style.width = newCdWidth + 'px';
+              cd.style.opacity = newCdWidth / cdWidth;
+            }
+            
+            playBtn.onclick = function(){
+                if (app.isPlaying === 0) {
+                  audio.play();
+                } else {
+                  audio.pause();
+                }
+
+                audio.onplay = function(){
+                  app.isPlaying = 1;
+                  player.classList.add('playing');
+                  cdRotate.play();
+                }
+
+                audio.onpause = function(){
+                  app.isPlaying = 0;
+                  player.classList.remove('playing');
+                  cdRotate.pause();
+                }
+            }
+
+            nextBtn.onclick = function() {
+              if(app.isRandom){
+                app.playRandom();
+              } else {
+                app.nextSong();              
+            }
+            audio.onplay = function(){
+                  app.isPlaying = 1;
+                  player.classList.add('playing');
+                  cdRotate.play();
+                }
+            audio.play();
+            app.render();
+            app.scrollToActiveView();
+            }
+
+            prevBtn.onclick = function() {
+              if(app.isRandom){
+                app.playRandom();
+              } else {
+                app.prevSong();              
+            }
+                 audio.onplay = function(){
+                  app.isPlaying = 1;
+                  player.classList.add('playing');
+                  cdRotate.play();
+                }
+              audio.play();
+              app.render();
+              app.scrollToActiveView();
+            }
+
+            ranBtn.onclick = function() {
+              if(ranBtn.classList.contains('active')){
+                ranBtn.classList.remove('active');
+                app.isRandom = false;
+              } else {
+                ranBtn.classList.add('active');
+                app.isRandom = true;
+              }          
+              
+            }
+
+            replayBtn.onclick = function() {
+              if(this.classList.contains('active')){
+                this.classList.remove('active');
+                app.isReplay = false;
+              } else {
+                this.classList.add('active');
+                app.isReplay = true;
+              }
+            }
+
+            audio.ontimeupdate = function() {
+              if (this.currentTime){
+              progress.value = this.currentTime / this.duration * 100;
+              }
+              
+            }
+
+            audio.onended = function() {
+              if(!app.isReplay) {
+                nextBtn.click();
+              }
+              audio.play();
+            }
+
+            progress.oninput = function() {
+              audio.currentTime = progress.value / 100 * audio.duration;
+            }
+            
+          },
+         
+          loadCurrentSong: function(){
+            heading.textContent = this.currentSong.name;
+            thumb.style.backgroundImage = `url('${this.currentSong.img}'`;
+            audio.src = this.currentSong.path;       
+          },
+
+          nextSong: function(){
+            if (app.curentIndex++ >= app.songs.length - 1){
+                app.curentIndex = 0;
+              }
+              app.loadCurrentSong();
+          },
+
+          prevSong: function(){
+            if (--app.curentIndex < 0){
+                app.curentIndex = app.songs.length - 1;
+              }
+              app.loadCurrentSong();
+          },
+
+          playRandom: function(){
+            let RandomIndex;
+            do {
+              RandomIndex = Math.floor(Math.random() * app.songs.length);
+              
+            }while(RandomIndex === app.curentIndex);
+            app.curentIndex = RandomIndex;
+            this.loadCurrentSong();
+          },
+
+          scrollToActiveView: function (){
+            setTimeout(() => {
+              $('.song.active').scrollIntoView({
+                behavior: 'smooth',
+                block: 'center',
+              })
+            }, 300)
+          },
+
+          start: function(){
+            this.handleEvent();
+            this.defineProperties();
+            this.loadCurrentSong();
+            this.render();
+            console.log();
+          } 
+        }
+        
+        app.start();
+      </script>
+
+</body>
+</html>
